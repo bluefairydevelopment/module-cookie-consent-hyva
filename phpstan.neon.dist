@@ -1,0 +1,9 @@
+# Static analysis for module-cookie-consent-hyva. Not run on the owner's Mac; run on a rig.
+parameters:
+    phpVersion: 80300
+    level: 5
+    paths:
+        - Observer
+        - registration.php
+    bootstrapFiles:
+        - Test/bootstrap.php

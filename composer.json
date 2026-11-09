@@ -1,0 +1,23 @@
+{
+    "name": "bluefairy/module-cookie-consent-hyva",
+    "description": "BlueFairy Cookie Consent - Hyva Alpine.js banner and preferences centre",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": [
+        "MIT"
+    ],
+    "require": {
+        "php": "^8.3",
+        "bluefairy/module-cookie-consent": "^1.0",
+        "magento/framework": "~103.0.8",
+        "hyva-themes/magento2-theme-module": "^1.3"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "BlueFairy\\CookieConsentHyva\\": ""
+        }
+    }
+}
