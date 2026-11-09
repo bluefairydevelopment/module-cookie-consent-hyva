@@ -1,0 +1,62 @@
+<?php
+
+/**
+ * Copyright © 2026 Blue Fairy Development. All rights reserved.
+ *
+ * Hyvä banner and preferences centre. Identical HTML for every visitor (full-page
+ * cache safe); the Alpine component asks the core engine what to show.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+/** @var \BlueFairy\CookieConsent\ViewModel\Consent $viewModel */
+$viewModel = $block->getData('view_model');
+if (!$viewModel->isEnabled()) {
+    return;
+}
+$config = $viewModel->getConfig();
+$positions = [
+    'bottom' => 'bottom-0 inset-x-0',
+    'top' => 'top-0 inset-x-0',
+    'center' => 'inset-0 flex items-center justify-center',
+];
+$positionClass = $positions[$config['position']] ?? $positions['bottom'];
+?>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_CookieConsentHyva::js/alpine-consent.js')) ?>"></script>
+<div x-data="bfCookieConsent()" x-init="init()" class="bf-cc">
+    <div x-show="visible" x-cloak
+         class="fixed z-50 p-4 <?= $escaper->escapeHtmlAttr($positionClass) ?>"
+         role="dialog" aria-modal="false" aria-labelledby="bf-cc-title" aria-describedby="bf-cc-message">
+        <div class="max-w-4xl mx-auto bg-white text-gray-900 rounded-lg shadow-xl p-5">
+            <h2 id="bf-cc-title" class="text-lg font-semibold mb-2"><?= $escaper->escapeHtml($config['text']['title']) ?></h2>
+            <p id="bf-cc-message" class="text-sm mb-3">
+                <?= $escaper->escapeHtml($config['text']['message']) ?>
+                <?php if ($config['policyUrl'] !== ''): ?>
+                    <a class="underline" href="<?= $escaper->escapeUrl($block->getUrl('', ['_direct' => ltrim($config['policyUrl'], '/')])) ?>"><?= $escaper->escapeHtml(__('Cookie policy')) ?></a>
+                <?php endif; ?>
+            </p>
+            <div x-show="prefsOpen" class="mb-3 space-y-2">
+                <template x-for="category in categories" :key="category.code">
+                    <label class="flex items-start gap-2">
+                        <input type="checkbox" class="mt-1" :value="category.code" :checked="isSelected(category.code)"
+                               :disabled="category.required" @change="toggle(category.code)">
+                        <span>
+                            <strong class="block" x-text="category.label"></strong>
+                            <span class="block text-sm text-gray-600" x-text="category.description"></span>
+                        </span>
+                    </label>
+                </template>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <?php /* Reject and Accept share one class list: equal prominence. */ ?>
+                <button type="button" class="btn btn-primary" @click="rejectAll()"><?= $escaper->escapeHtml(__('Reject all')) ?></button>
+                <button type="button" class="btn btn-primary" @click="acceptAll()"><?= $escaper->escapeHtml(__('Accept all')) ?></button>
+                <button type="button" class="btn" x-show="!prefsOpen" @click="customise()"><?= $escaper->escapeHtml(__('Customise')) ?></button>
+                <button type="button" class="btn" x-show="prefsOpen" @click="save()"><?= $escaper->escapeHtml(__('Save choices')) ?></button>
+            </div>
+        </div>
+    </div>
+    <button type="button" x-show="showReopen()" x-cloak @click="reopen()"
+            class="fixed z-40 left-3 bottom-3 text-xs btn"><?= $escaper->escapeHtml(__('Cookie settings')) ?></button>
+</div>

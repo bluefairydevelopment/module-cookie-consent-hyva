@@ -1,0 +1,11 @@
+{
+    "name": "bluefairy-cookie-consent-hyva",
+    "private": true,
+    "scripts": {
+        "test": "jest"
+    },
+    "devDependencies": {
+        "jest": "^29.7",
+        "jest-environment-jsdom": "^29.7"
+    }
+}

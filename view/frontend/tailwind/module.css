@@ -1,0 +1,19 @@
+/**
+ * Copyright © 2026 Blue Fairy Development. All rights reserved.
+ *
+ * Tailwind source registration for BlueFairy_CookieConsentHyva.
+ *
+ * Points Hyvä's Tailwind build at this module's templates so that the utility
+ * classes used only in them are compiled. The module registers its
+ * view/frontend/tailwind directory on the hyva_config_generate_before event
+ * (etc/frontend/events.xml, Observer/RegisterModuleForHyvaConfig.php).
+ *
+ * After installing or upgrading this module the merchant must rebuild the
+ * theme's CSS (`npm run build` in the theme's web/tailwind directory).
+ *
+ * No @source inline(...) safelist is needed here — this module's templates
+ * bind classes only from a fixed list written out in full, so the glob
+ * below is sufficient on its own.
+ */
+
+@source "../templates/**/*.phtml";
