@@ -75,3 +75,32 @@ test('without the core engine the component stays inert', async () => {
     expect(c.ready).toBe(false);
     expect(c.categories).toEqual([]);
 });
+
+test('init is idempotent: Alpine calling it twice creates one controller', async () => {
+    const { win, doc } = env();
+    let created = 0;
+    const realCreate = engine.create;
+    win.BlueFairyConsent = Object.assign({}, engine, {
+        create: function () { created++; return realCreate.apply(null, arguments); }
+    });
+    const c = factory(win, doc);
+    const first = c.init();
+    const second = c.init();
+    await Promise.all([first, second]);
+    expect(created).toBe(1);
+    expect(c.visible).toBe(true);
+});
+
+test('the template does not call init() from x-init as well (Alpine v3 calls it already)', () => {
+    const fs = require('fs');
+    const tpl = fs.readFileSync(path.resolve(__dirname, '../../view/frontend/templates/banner.phtml'), 'utf8');
+    expect(tpl).toContain('x-data="bfCookieConsent()"');
+    expect(tpl).not.toMatch(/x-init="init\(\)"/);
+});
+
+test('the policy link uses the view model, so an absolute URL is not appended to the base URL', () => {
+    const fs = require('fs');
+    const tpl = fs.readFileSync(path.resolve(__dirname, '../../view/frontend/templates/banner.phtml'), 'utf8');
+    expect(tpl).toContain('$viewModel->getPolicyHref($block->getBaseUrl())');
+    expect(tpl).not.toContain("'_direct'");
+});
