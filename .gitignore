@@ -1,0 +1,6 @@
+/.idea/
+/.idea/*
+/.idea/.*
+.phpunit.result.cache
+docs/screenshots/
+node_modules
