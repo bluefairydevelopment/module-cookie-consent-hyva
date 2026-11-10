@@ -62,7 +62,20 @@
                 var i = this.selected.indexOf(code);
                 if (i >= 0) { this.selected.splice(i, 1); } else { this.selected.push(code); }
             },
-            customise: function () { this.prefsOpen = true; },
+            customise: function () {
+                this.prefsOpen = true;
+                // Customise hides itself once the preferences are open, so keyboard focus moves
+                // to the first choice the visitor can change, after Alpine has shown it.
+                var timer = typeof win.setTimeout === 'function' ? win.setTimeout : setTimeout;
+                timer(function () {
+                    var box = doc.querySelector
+                        ? doc.querySelector('[data-bf-cc-prefs] input[type="checkbox"]:not([disabled])')
+                        : null;
+                    if (box && typeof box.focus === 'function') {
+                        box.focus();
+                    }
+                }, 0);
+            },
             acceptAll: function () { return this.ctl.acceptAll(); },
             rejectAll: function () { return this.ctl.rejectAll(); },
             save: function () { return this.ctl.save(this.selected); },
