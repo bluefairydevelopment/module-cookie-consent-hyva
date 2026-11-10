@@ -94,7 +94,7 @@ test('init is idempotent: Alpine calling it twice creates one controller', async
 test('the template does not call init() from x-init as well (Alpine v3 calls it already)', () => {
     const fs = require('fs');
     const tpl = fs.readFileSync(path.resolve(__dirname, '../../view/frontend/templates/banner.phtml'), 'utf8');
-    expect(tpl).toContain('x-data="bfCookieConsent()"');
+    expect(tpl).toContain('x-data="bfCookieConsent"');
     expect(tpl).not.toMatch(/x-init="init\(\)"/);
 });
 
@@ -117,4 +117,54 @@ test('customise moves keyboard focus to the first choice it can change', async (
     c.customise();
     expect(c.prefsOpen).toBe(true);
     expect(focused).toEqual(['analytics']);
+});
+
+test('registers itself with Alpine.data on alpine:init, for the Alpine CSP build', () => {
+    const vm = require('vm');
+    const fs = require('fs');
+    const src = fs.readFileSync(path.resolve(__dirname, '../../view/frontend/web/js/alpine-consent.js'), 'utf8');
+    const listeners = {};
+    const registered = {};
+    const sandbox = {
+        addEventListener: (name, fn, opts) => { listeners[name] = { fn, opts }; },
+        Alpine: { data: (name, fn) => { registered[name] = fn; } }
+    };
+    sandbox.self = sandbox;
+    sandbox.window = sandbox;
+    sandbox.document = {};
+    vm.runInNewContext(src, sandbox);
+    expect(typeof sandbox.bfCookieConsent).toBe('function');
+    expect(listeners['alpine:init']).toBeDefined();
+    expect(listeners['alpine:init'].opts).toEqual({ once: true });
+    listeners['alpine:init'].fn();
+    expect(typeof registered.bfCookieConsent).toBe('function');
+    const data = registered.bfCookieConsent();
+    expect(typeof data.init).toBe('function');
+    expect(typeof data.rejectAll).toBe('function');
+});
+
+test('loop methods read the x-for item from this.category, as the template names them without arguments', async () => {
+    const { win, doc } = env();
+    const c = factory(win, doc);
+    await c.init();
+    const scope = item => Object.assign(Object.create(c), { category: item });
+    expect(c.isCategorySelected.call(scope({ code: 'necessary' }))).toBe(true);
+    expect(c.isCategorySelected.call(scope({ code: 'analytics' }))).toBe(false);
+    c.toggleCategory.call(scope({ code: 'analytics' }));
+    expect(c.isSelected('analytics')).toBe(true);
+    c.toggleCategory.call(scope({ code: 'necessary' }));
+    expect(c.isSelected('necessary')).toBe(true);
+    expect(c.prefsClosed()).toBe(true);
+    c.customise();
+    expect(c.prefsClosed()).toBe(false);
+});
+
+test('every method the template names exists on the component', () => {
+    const fs = require('fs');
+    const tpl = fs.readFileSync(path.resolve(__dirname, '../../view/frontend/templates/banner.phtml'), 'utf8');
+    const c = factory({}, {});
+    const names = [];
+    tpl.replace(/\s(?:@[\w.:-]+|x-show|:checked|:disabled)="([A-Za-z_$][\w$]*)"/g, (m, n) => { names.push(n); return m; });
+    expect(names.length).toBeGreaterThanOrEqual(9);
+    names.forEach(n => expect([n, typeof c[n]]).toEqual([n, typeof c[n] === 'boolean' ? 'boolean' : 'function']));
 });

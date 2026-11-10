@@ -38,8 +38,8 @@ class PackageTest extends TestCase
     public function testRejectAndAcceptHaveEqualProminence(): void
     {
         $tpl = (string) file_get_contents(self::ROOT . '/view/frontend/templates/banner.phtml');
-        preg_match('/<button[^>]*class="([^"]+)"[^>]*@click="rejectAll\(\)"/', $tpl, $reject);
-        preg_match('/<button[^>]*class="([^"]+)"[^>]*@click="acceptAll\(\)"/', $tpl, $accept);
+        preg_match('/<button[^>]*class="([^"]+)"[^>]*@click="rejectAll"/', $tpl, $reject);
+        preg_match('/<button[^>]*class="([^"]+)"[^>]*@click="acceptAll"/', $tpl, $accept);
         self::assertNotEmpty($reject);
         self::assertSame($accept[1] ?? null, $reject[1]);
     }
