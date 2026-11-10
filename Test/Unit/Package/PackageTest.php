@@ -49,4 +49,13 @@ class PackageTest extends TestCase
         self::assertStringContainsString('@source "../templates/**/*.phtml"',
             (string) file_get_contents(self::ROOT . '/view/frontend/tailwind/module.css'));
     }
+
+    public function testNoToolCacheShipsInThePackage(): void
+    {
+        // npm writes its cache and logs to .cache/ in the package root; they once got committed.
+        $ignore = (string) file_get_contents(self::ROOT . '/.gitignore');
+        $attributes = (string) file_get_contents(self::ROOT . '/.gitattributes');
+        self::assertMatchesRegularExpression('#^\.cache/$#m', $ignore);
+        self::assertMatchesRegularExpression('#^\.cache/ export-ignore$#m', $attributes);
+    }
 }

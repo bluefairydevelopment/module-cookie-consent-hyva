@@ -104,3 +104,17 @@ test('the policy link uses the view model, so an absolute URL is not appended to
     expect(tpl).toContain('$viewModel->getPolicyHref($block->getBaseUrl())');
     expect(tpl).not.toContain("'_direct'");
 });
+
+test('customise moves keyboard focus to the first choice it can change', async () => {
+    const { win, doc } = env();
+    const focused = [];
+    const necessary = { focus: () => focused.push('necessary') };
+    const analytics = { focus: () => focused.push('analytics') };
+    doc.querySelector = sel => (sel.indexOf(':not([disabled])') >= 0 ? analytics : necessary);
+    win.setTimeout = fn => fn();
+    const c = factory(win, doc);
+    await c.init();
+    c.customise();
+    expect(c.prefsOpen).toBe(true);
+    expect(focused).toEqual(['analytics']);
+});

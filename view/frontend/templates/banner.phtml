@@ -36,7 +36,7 @@ $positionClass = $positions[$config['position']] ?? $positions['bottom'];
                     <a class="underline" href="<?= $escaper->escapeUrl($viewModel->getPolicyHref($block->getBaseUrl())) ?>"><?= $escaper->escapeHtml(__('Cookie policy')) ?></a>
                 <?php endif; ?>
             </p>
-            <div x-show="prefsOpen" class="mb-3 space-y-2">
+            <div x-show="prefsOpen" data-bf-cc-prefs class="mb-3 space-y-2">
                 <template x-for="category in categories" :key="category.code">
                     <label class="flex items-start gap-2">
                         <input type="checkbox" class="mt-1" :value="category.code" :checked="isSelected(category.code)"
