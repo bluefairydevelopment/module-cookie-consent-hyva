@@ -24,7 +24,7 @@ $positions = [
 $positionClass = $positions[$config['position']] ?? $positions['bottom'];
 ?>
 <script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_CookieConsentHyva::js/alpine-consent.js')) ?>"></script>
-<div x-data="bfCookieConsent()" x-init="init()" class="bf-cc">
+<div x-data="bfCookieConsent()" class="bf-cc">
     <div x-show="visible" x-cloak
          class="fixed z-50 p-4 <?= $escaper->escapeHtmlAttr($positionClass) ?>"
          role="dialog" aria-modal="false" aria-labelledby="bf-cc-title" aria-describedby="bf-cc-message">
@@ -33,7 +33,7 @@ $positionClass = $positions[$config['position']] ?? $positions['bottom'];
             <p id="bf-cc-message" class="text-sm mb-3">
                 <?= $escaper->escapeHtml($config['text']['message']) ?>
                 <?php if ($config['policyUrl'] !== ''): ?>
-                    <a class="underline" href="<?= $escaper->escapeUrl($block->getUrl('', ['_direct' => ltrim($config['policyUrl'], '/')])) ?>"><?= $escaper->escapeHtml(__('Cookie policy')) ?></a>
+                    <a class="underline" href="<?= $escaper->escapeUrl($viewModel->getPolicyHref($block->getBaseUrl())) ?>"><?= $escaper->escapeHtml(__('Cookie policy')) ?></a>
                 <?php endif; ?>
             </p>
             <div x-show="prefsOpen" class="mb-3 space-y-2">

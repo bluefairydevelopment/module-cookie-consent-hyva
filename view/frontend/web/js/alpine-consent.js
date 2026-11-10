@@ -26,16 +26,22 @@
             categories: (win.BlueFairyConsentConfig && win.BlueFairyConsentConfig.categories) || [],
             selected: [],
             ctl: null,
+            initialised: null,
 
             init: function () {
                 var self = this;
+                // Alpine v3 calls init() itself; a second call must not build a second controller.
+                if (this.initialised) {
+                    return this.initialised;
+                }
                 if (!win.BlueFairyConsent || !win.BlueFairyConsentConfig) {
                     return Promise.resolve();
                 }
                 this.ctl = win.BlueFairyConsent.create(win.BlueFairyConsentConfig, win, doc);
                 win.BlueFairyConsentController = this.ctl;
                 this.ctl.onChange(function () { self.sync(); });
-                return this.ctl.ready.then(function () { self.ready = true; self.sync(); });
+                this.initialised = this.ctl.ready.then(function () { self.ready = true; self.sync(); });
+                return this.initialised;
             },
             sync: function () {
                 this.visible = this.ctl.bannerVisible;
