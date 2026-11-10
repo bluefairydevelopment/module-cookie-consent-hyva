@@ -13,3 +13,4 @@ jest.config.js export-ignore
 package.json export-ignore
 package-lock.json export-ignore
 .cache/ export-ignore
+docs/images/REVIEWED.md export-ignore

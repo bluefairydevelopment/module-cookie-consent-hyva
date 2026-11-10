@@ -18,6 +18,17 @@ Then rebuild your Hyvä theme's CSS (`npm run build` in the theme's `web/tailwin
 the module registers its templates with Hyvä's Tailwind config generator.
 
 The banner uses the theme's `btn` and `btn-primary` classes, with Reject and Accept styled the same.
+Customise hides itself once the preferences are open and moves keyboard focus to the first
+choice.
+
+Included with a BlueFairy Cookie Consent purchase (`bluefairy/module-cookie-consent`), which it
+requires. Magento Open Source 2.4.8 or later, PHP 8.3 or later, Hyvä theme module 1.5 or later.
+
+## Screenshots
+
+![Hyvä banner](docs/images/hyva-banner.png)
+
+![Hyvä preferences](docs/images/hyva-preferences.png)
 
 ## Tests
 
