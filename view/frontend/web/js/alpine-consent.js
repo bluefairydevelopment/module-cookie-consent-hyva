@@ -2,7 +2,8 @@
  * Copyright © 2026 Blue Fairy Development. All rights reserved.
  *
  * Alpine.js component for the Hyvä banner. A thin view over the core engine
- * (window.BlueFairyConsent); every decision is the engine's.
+ * (window.BlueFairyConsent); every decision is the engine's. Registered as
+ * Alpine.data('bfCookieConsent') so it also runs under Alpine's CSP build.
  */
 (function (root, factory) {
     'use strict';
@@ -11,6 +12,13 @@
         module.exports = api;
     } else {
         root.bfCookieConsent = api;
+        // Hyvä's strict CSP runs the Alpine CSP build, where x-data must name a component
+        // registered with Alpine.data(). The plain build accepts the same registration.
+        if (typeof root.addEventListener === 'function') {
+            root.addEventListener('alpine:init', function () {
+                root.Alpine.data('bfCookieConsent', function () { return api(); });
+            }, { once: true });
+        }
     }
 }(typeof self !== 'undefined' ? self : this, function () {
     'use strict';
@@ -62,6 +70,11 @@
                 var i = this.selected.indexOf(code);
                 if (i >= 0) { this.selected.splice(i, 1); } else { this.selected.push(code); }
             },
+            // The template may name methods only (no arguments, no "!"), so these read the
+            // x-for item from this.category, which Alpine puts in scope for the call.
+            isCategorySelected: function () { return this.isSelected(this.category.code); },
+            toggleCategory: function () { this.toggle(this.category.code); },
+            prefsClosed: function () { return !this.prefsOpen; },
             customise: function () {
                 this.prefsOpen = true;
                 // Customise hides itself once the preferences are open, so keyboard focus moves

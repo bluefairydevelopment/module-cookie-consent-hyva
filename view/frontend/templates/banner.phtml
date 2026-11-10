@@ -6,6 +6,12 @@
  * Hyvä banner and preferences centre. Identical HTML for every visitor (full-page
  * cache safe); the Alpine component asks the core engine what to show.
  *
+ * Works under Hyvä's strict CSP (the Alpine CSP build): the component is registered with
+ * Alpine.data() by alpine-consent.js, and every Alpine attribute names a property or a
+ * method, never an expression. Loop-dependent methods read the loop item as this.category.
+ * The template has no inline script; one added later must be followed by
+ * $hyvaCsp->registerInlineScript().
+ *
  * @var \Magento\Framework\View\Element\Template $block
  * @var \Magento\Framework\Escaper $escaper
  */
@@ -24,7 +30,7 @@ $positions = [
 $positionClass = $positions[$config['position']] ?? $positions['bottom'];
 ?>
 <script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_CookieConsentHyva::js/alpine-consent.js')) ?>"></script>
-<div x-data="bfCookieConsent()" class="bf-cc">
+<div x-data="bfCookieConsent" class="bf-cc">
     <div x-show="visible" x-cloak
          class="fixed z-50 p-4 <?= $escaper->escapeHtmlAttr($positionClass) ?>"
          role="dialog" aria-modal="false" aria-labelledby="bf-cc-title" aria-describedby="bf-cc-message">
@@ -39,8 +45,8 @@ $positionClass = $positions[$config['position']] ?? $positions['bottom'];
             <div x-show="prefsOpen" data-bf-cc-prefs class="mb-3 space-y-2">
                 <template x-for="category in categories" :key="category.code">
                     <label class="flex items-start gap-2">
-                        <input type="checkbox" class="mt-1" :value="category.code" :checked="isSelected(category.code)"
-                               :disabled="category.required" @change="toggle(category.code)">
+                        <input type="checkbox" class="mt-1" :value="category.code" :checked="isCategorySelected"
+                               :disabled="category.required" @change="toggleCategory">
                         <span>
                             <strong class="block" x-text="category.label"></strong>
                             <span class="block text-sm text-gray-600" x-text="category.description"></span>
@@ -50,13 +56,13 @@ $positionClass = $positions[$config['position']] ?? $positions['bottom'];
             </div>
             <div class="flex flex-wrap gap-2">
                 <?php /* Reject and Accept share one class list: equal prominence. */ ?>
-                <button type="button" class="btn btn-primary" @click="rejectAll()"><?= $escaper->escapeHtml(__('Reject all')) ?></button>
-                <button type="button" class="btn btn-primary" @click="acceptAll()"><?= $escaper->escapeHtml(__('Accept all')) ?></button>
-                <button type="button" class="btn" x-show="!prefsOpen" @click="customise()"><?= $escaper->escapeHtml(__('Customise')) ?></button>
-                <button type="button" class="btn" x-show="prefsOpen" @click="save()"><?= $escaper->escapeHtml(__('Save choices')) ?></button>
+                <button type="button" class="btn btn-primary" @click="rejectAll"><?= $escaper->escapeHtml(__('Reject all')) ?></button>
+                <button type="button" class="btn btn-primary" @click="acceptAll"><?= $escaper->escapeHtml(__('Accept all')) ?></button>
+                <button type="button" class="btn" x-show="prefsClosed" @click="customise"><?= $escaper->escapeHtml(__('Customise')) ?></button>
+                <button type="button" class="btn" x-show="prefsOpen" @click="save"><?= $escaper->escapeHtml(__('Save choices')) ?></button>
             </div>
         </div>
     </div>
-    <button type="button" x-show="showReopen()" x-cloak @click="reopen()"
+    <button type="button" x-show="showReopen" x-cloak @click="reopen"
             class="fixed z-40 left-3 bottom-3 text-xs btn"><?= $escaper->escapeHtml(__('Cookie settings')) ?></button>
 </div>

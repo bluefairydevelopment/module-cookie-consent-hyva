@@ -21,6 +21,10 @@ The banner uses the theme's `btn` and `btn-primary` classes, with Reject and Acc
 Customise hides itself once the preferences are open and moves keyboard focus to the first
 choice.
 
+Works with Hyvä's strict CSP mode as well as the default one: the component is registered with
+`Alpine.data()`, its Alpine attributes hold only property and method names, and the template
+has no inline script.
+
 Included with a BlueFairy Cookie Consent purchase (`bluefairy/module-cookie-consent`), which it
 requires. Magento Open Source 2.4.8 or later, PHP 8.3 or later, Hyvä theme module 1.5 or later.
 
