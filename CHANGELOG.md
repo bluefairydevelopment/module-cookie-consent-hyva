@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1 — 2026-11-11
+
+### Changed
+
+- Documentation: product images signed off for the store gallery. The review record (`docs/images/REVIEWED.md`) now ships with the package.
+
 ## 1.0.0 — 2026-11-09
 
 ### Fixed
