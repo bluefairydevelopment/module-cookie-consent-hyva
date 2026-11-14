@@ -8,6 +8,7 @@
 (function (root, factory) {
     'use strict';
     var api = factory();
+
     if (typeof module === 'object' && module.exports) {
         module.exports = api;
     } else {
@@ -31,13 +32,14 @@
             visible: false,
             prefsOpen: false,
             mode: 'opt_in',
-            categories: (win.BlueFairyConsentConfig && win.BlueFairyConsentConfig.categories) || [],
+            categories: win.BlueFairyConsentConfig && win.BlueFairyConsentConfig.categories || [],
             selected: [],
             ctl: null,
             initialised: null,
 
             init: function () {
                 var self = this;
+
                 // Alpine v3 calls init() itself; a second call must not build a second controller.
                 if (this.initialised) {
                     return this.initialised;
@@ -64,10 +66,13 @@
                 return this.isRequired(code) || this.selected.indexOf(code) >= 0;
             },
             toggle: function (code) {
+                var i;
+
                 if (this.isRequired(code)) {
                     return;
                 }
-                var i = this.selected.indexOf(code);
+                i = this.selected.indexOf(code);
+
                 if (i >= 0) { this.selected.splice(i, 1); } else { this.selected.push(code); }
             },
             // The template may name methods only (no arguments, no "!"), so these read the
@@ -76,14 +81,16 @@
             toggleCategory: function () { this.toggle(this.category.code); },
             prefsClosed: function () { return !this.prefsOpen; },
             customise: function () {
+                var timer = typeof win.setTimeout === 'function' ? win.setTimeout : setTimeout;
+
                 this.prefsOpen = true;
                 // Customise hides itself once the preferences are open, so keyboard focus moves
                 // to the first choice the visitor can change, after Alpine has shown it.
-                var timer = typeof win.setTimeout === 'function' ? win.setTimeout : setTimeout;
                 timer(function () {
                     var box = doc.querySelector
                         ? doc.querySelector('[data-bf-cc-prefs] input[type="checkbox"]:not([disabled])')
                         : null;
+
                     if (box && typeof box.focus === 'function') {
                         box.focus();
                     }
