@@ -3,27 +3,45 @@
  */
 const path = require('path');
 const factory = require('../../view/frontend/web/js/alpine-consent.js');
-const enginePath = process.env.BF_CC_ENGINE
-    || path.resolve(__dirname, '../../../module-cookie-consent/view/frontend/web/js/consent-engine.js');
+const enginePath =
+    process.env.BF_CC_ENGINE ||
+    path.resolve(__dirname, '../../../module-cookie-consent/view/frontend/web/js/consent-engine.js');
 const engine = require(enginePath);
 
 function env(cookie, nav) {
     const jar = {};
-    String(cookie || '').split(/;\s*/).filter(Boolean).forEach(p => { jar[p.split('=')[0]] = p; });
+    String(cookie || '')
+        .split(/;\s*/)
+        .filter(Boolean)
+        .forEach((p) => {
+            jar[p.split('=')[0]] = p;
+        });
     const doc = {
         querySelectorAll: () => [],
-        get cookie() { return Object.values(jar).join('; '); },
-        set cookie(v) { const p = v.split(';')[0]; jar[p.split('=')[0]] = p; }
+        get cookie() {
+            return Object.values(jar).join('; ');
+        },
+        set cookie(v) {
+            const p = v.split(';')[0];
+            jar[p.split('=')[0]] = p;
+        }
     };
     const win = {
-        navigator: nav || {}, location: { protocol: 'https:' }, dispatchEvent: () => true,
-        crypto: { getRandomValues: b => b.fill(1) },
+        navigator: nav || {},
+        location: { protocol: 'https:' },
+        dispatchEvent: () => true,
+        crypto: { getRandomValues: (b) => b.fill(1) },
         sessionStorage: { getItem: () => null, setItem: () => {} },
         BlueFairyConsent: engine,
         BlueFairyConsentConfig: {
-            cookieName: 'bf_cookie_consent', policyVersion: '1', lifetimeDays: 30, honourGpc: true,
+            cookieName: 'bf_cookie_consent',
+            policyVersion: '1',
+            lifetimeDays: 30,
+            honourGpc: true,
             categories: [{ code: 'necessary', required: true }, { code: 'analytics' }, { code: 'marketing' }],
-            geo: { endpoint: '' }, endpoints: {}, consentMode: { enabled: false }
+            geo: { endpoint: '' },
+            endpoints: {},
+            consentMode: { enabled: false }
         }
     };
     return { win, doc };
@@ -81,7 +99,10 @@ test('init is idempotent: Alpine calling it twice creates one controller', async
     let created = 0;
     const realCreate = engine.create;
     win.BlueFairyConsent = Object.assign({}, engine, {
-        create: function () { created++; return realCreate.apply(null, arguments); }
+        create: function () {
+            created++;
+            return realCreate.apply(null, arguments);
+        }
     });
     const c = factory(win, doc);
     const first = c.init();
@@ -110,8 +131,8 @@ test('customise moves keyboard focus to the first choice it can change', async (
     const focused = [];
     const necessary = { focus: () => focused.push('necessary') };
     const analytics = { focus: () => focused.push('analytics') };
-    doc.querySelector = sel => (sel.indexOf(':not([disabled])') >= 0 ? analytics : necessary);
-    win.setTimeout = fn => fn();
+    doc.querySelector = (sel) => (sel.indexOf(':not([disabled])') >= 0 ? analytics : necessary);
+    win.setTimeout = (fn) => fn();
     const c = factory(win, doc);
     await c.init();
     c.customise();
@@ -126,8 +147,14 @@ test('registers itself with Alpine.data on alpine:init, for the Alpine CSP build
     const listeners = {};
     const registered = {};
     const sandbox = {
-        addEventListener: (name, fn, opts) => { listeners[name] = { fn, opts }; },
-        Alpine: { data: (name, fn) => { registered[name] = fn; } }
+        addEventListener: (name, fn, opts) => {
+            listeners[name] = { fn, opts };
+        },
+        Alpine: {
+            data: (name, fn) => {
+                registered[name] = fn;
+            }
+        }
     };
     sandbox.self = sandbox;
     sandbox.window = sandbox;
@@ -147,7 +174,7 @@ test('loop methods read the x-for item from this.category, as the template names
     const { win, doc } = env();
     const c = factory(win, doc);
     await c.init();
-    const scope = item => Object.assign(Object.create(c), { category: item });
+    const scope = (item) => Object.assign(Object.create(c), { category: item });
     expect(c.isCategorySelected.call(scope({ code: 'necessary' }))).toBe(true);
     expect(c.isCategorySelected.call(scope({ code: 'analytics' }))).toBe(false);
     c.toggleCategory.call(scope({ code: 'analytics' }));
@@ -164,7 +191,10 @@ test('every method the template names exists on the component', () => {
     const tpl = fs.readFileSync(path.resolve(__dirname, '../../view/frontend/templates/banner.phtml'), 'utf8');
     const c = factory({}, {});
     const names = [];
-    tpl.replace(/\s(?:@[\w.:-]+|x-show|:checked|:disabled)="([A-Za-z_$][\w$]*)"/g, (m, n) => { names.push(n); return m; });
+    tpl.replace(/\s(?:@[\w.:-]+|x-show|:checked|:disabled)="([A-Za-z_$][\w$]*)"/g, (m, n) => {
+        names.push(n);
+        return m;
+    });
     expect(names.length).toBeGreaterThanOrEqual(9);
-    names.forEach(n => expect([n, typeof c[n]]).toEqual([n, typeof c[n] === 'boolean' ? 'boolean' : 'function']));
+    names.forEach((n) => expect([n, typeof c[n]]).toEqual([n, typeof c[n] === 'boolean' ? 'boolean' : 'function']));
 });
